@@ -68,6 +68,17 @@ public class SistemaBiblioteca {
         return procesado;
     }
 
+    /**
+     * Busca un prestamo en la lista general por su codigo. Se crea un
+     * LibroPrestamo "de busqueda" solo con el codigo: como equals() compara
+     * por codigo, la lista encuentra el objeto original con todos sus datos.
+     *
+     * @return el prestamo encontrado o null si no existe
+     */
+    public LibroPrestamo buscarPorCodigo(String codigo) {
+        return (LibroPrestamo) listaGeneral.buscarDato(new LibroPrestamo(codigo));
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
@@ -150,6 +161,9 @@ public class SistemaBiblioteca {
                             + historialEntregados.tamanio() + ") ---");
                     System.out.print(historialEntregados.mostrar());
                     break;
+                case 6:
+                    opcionBuscar(entrada);
+                    break;
                 case 10:
                     return false;
                 default:
@@ -185,6 +199,27 @@ public class SistemaBiblioteca {
         System.out.println("Libro entregado al lector:");
         System.out.println("  " + entregado);
         System.out.println("  Pendientes restantes: " + colaPendientes.tamanio());
+    }
+
+    private void opcionBuscar(Scanner entrada) {
+        System.out.println("--- Buscar prestamo ---");
+        String codigo = leerTexto(entrada, "Codigo del prestamo: ");
+        LibroPrestamo encontrado = buscarPorCodigo(codigo);
+        if (encontrado == null) {
+            System.out.println("No existe un prestamo con el codigo " + codigo.toUpperCase());
+            return;
+        }
+        System.out.println("Prestamo encontrado:");
+        System.out.println("  " + encontrado);
+        // Ademas se indica en que estructura esta actualmente.
+        if (colaPendientes.contiene(encontrado)) {
+            System.out.println("  Esta en la cola de pendientes.");
+        } else if (historialEntregados.contiene(encontrado)) {
+            System.out.println("  Esta en el historial de entregas, posicion "
+                    + historialEntregados.buscar(encontrado) + " desde el tope.");
+        } else {
+            System.out.println("  Solo esta en el registro general (fue cancelado).");
+        }
     }
 
     // ---------------------------------------------------------------------
