@@ -79,6 +79,48 @@ public class SistemaBiblioteca {
         return (LibroPrestamo) listaGeneral.buscarDato(new LibroPrestamo(codigo));
     }
 
+    /**
+     * Cancela un prestamo que todavia esta pendiente.
+     *
+     * Una cola solo permite sacar por el frente, asi que NO se elimina el nodo
+     * del centro directamente. Se usa una cola auxiliar:
+     *  1. Se desencolan todos los pendientes.
+     *  2. Los que no son el buscado se encolan en la auxiliar (conservan su orden).
+     *  3. El buscado se marca CANCELADO y no se vuelve a encolar.
+     *  4. Se devuelven los elementos de la auxiliar a la cola original.
+     * El prestamo cancelado sigue en la lista general como registro.
+     *
+     * @return el prestamo cancelado
+     * @throws IllegalArgumentException si el codigo no existe o el prestamo no esta pendiente
+     */
+    public LibroPrestamo cancelarPendiente(String codigo) {
+        LibroPrestamo prestamo = buscarPorCodigo(codigo);
+        if (prestamo == null) {
+            throw new IllegalArgumentException("No existe un prestamo con el codigo " + codigo.trim().toUpperCase());
+        }
+        if (!LibroPrestamo.PENDIENTE.equals(prestamo.getEstado())) {
+            throw new IllegalArgumentException("El prestamo " + prestamo.getCodigoPrestamo()
+                    + " no se puede cancelar porque su estado es " + prestamo.getEstado());
+        }
+
+        Cola colaAuxiliar = new Cola();
+        LibroPrestamo cancelado = null;
+        while (!colaPendientes.esVacia()) {
+            LibroPrestamo actual = (LibroPrestamo) colaPendientes.desencolar();
+            if (actual.equals(prestamo)) {
+                cancelado = actual;
+            } else {
+                colaAuxiliar.encolar(actual);
+            }
+        }
+        while (!colaAuxiliar.esVacia()) {
+            colaPendientes.encolar(colaAuxiliar.desencolar());
+        }
+
+        cancelado.setEstado(LibroPrestamo.CANCELADO);
+        return cancelado;
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
@@ -164,6 +206,9 @@ public class SistemaBiblioteca {
                 case 6:
                     opcionBuscar(entrada);
                     break;
+                case 7:
+                    opcionCancelar(entrada);
+                    break;
                 case 10:
                     return false;
                 default:
@@ -220,6 +265,20 @@ public class SistemaBiblioteca {
         } else {
             System.out.println("  Solo esta en el registro general (fue cancelado).");
         }
+    }
+
+    private void opcionCancelar(Scanner entrada) {
+        System.out.println("--- Cancelar prestamo pendiente ---");
+        if (colaPendientes.esVacia()) {
+            System.out.println("No hay prestamos pendientes para cancelar.");
+            return;
+        }
+        System.out.print(colaPendientes.mostrar());
+        String codigo = leerTexto(entrada, "Codigo del prestamo a cancelar: ");
+        LibroPrestamo cancelado = cancelarPendiente(codigo);
+        System.out.println("Prestamo cancelado:");
+        System.out.println("  " + cancelado);
+        System.out.println("  Pendientes restantes: " + colaPendientes.tamanio());
     }
 
     // ---------------------------------------------------------------------
