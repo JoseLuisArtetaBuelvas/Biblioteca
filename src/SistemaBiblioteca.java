@@ -121,6 +121,25 @@ public class SistemaBiblioteca {
         return cancelado;
     }
 
+    /**
+     * Deshace la ultima entrega: el prestamo del tope de la pila (el ultimo
+     * entregado, por LIFO) se desapila, vuelve a PENDIENTE y se encola de
+     * nuevo en la cola de pendientes, como exige la regla de deshacer.
+     * Queda al final de la cola, porque una cola solo admite entradas por el fin.
+     *
+     * @return el prestamo devuelto a pendientes
+     * @throws IllegalStateException si el historial esta vacio
+     */
+    public LibroPrestamo deshacerUltimaEntrega() {
+        if (historialEntregados.esVacia()) {
+            throw new IllegalStateException("No hay entregas en el historial para deshacer");
+        }
+        LibroPrestamo ultimo = (LibroPrestamo) historialEntregados.desapilar();
+        ultimo.setEstado(LibroPrestamo.PENDIENTE);
+        colaPendientes.encolar(ultimo);
+        return ultimo;
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
@@ -209,6 +228,9 @@ public class SistemaBiblioteca {
                 case 7:
                     opcionCancelar(entrada);
                     break;
+                case 8:
+                    opcionDeshacer();
+                    break;
                 case 10:
                     return false;
                 default:
@@ -279,6 +301,13 @@ public class SistemaBiblioteca {
         System.out.println("Prestamo cancelado:");
         System.out.println("  " + cancelado);
         System.out.println("  Pendientes restantes: " + colaPendientes.tamanio());
+    }
+
+    private void opcionDeshacer() {
+        LibroPrestamo devuelto = deshacerUltimaEntrega();
+        System.out.println("Se deshizo la ultima entrega. El prestamo vuelve a pendientes:");
+        System.out.println("  " + devuelto);
+        System.out.println("  Posicion en la cola: " + colaPendientes.tamanio());
     }
 
     // ---------------------------------------------------------------------
