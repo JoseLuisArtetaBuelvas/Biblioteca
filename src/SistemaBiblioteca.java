@@ -51,6 +51,23 @@ public class SistemaBiblioteca {
         colaPendientes.encolar(prestamo);
     }
 
+    /**
+     * Procesa (entrega) el prestamo que lleva mas tiempo esperando:
+     * sale del frente de la cola y queda en el tope de la pila de historial.
+     *
+     * @return el prestamo entregado
+     * @throws IllegalStateException si no hay prestamos pendientes
+     */
+    public LibroPrestamo procesarSiguiente() {
+        if (colaPendientes.esVacia()) {
+            throw new IllegalStateException("No hay prestamos pendientes por procesar");
+        }
+        LibroPrestamo procesado = (LibroPrestamo) colaPendientes.desencolar();
+        procesado.setEstado(LibroPrestamo.ENTREGADO);
+        historialEntregados.apilar(procesado);
+        return procesado;
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
@@ -125,6 +142,14 @@ public class SistemaBiblioteca {
                             + colaPendientes.tamanio() + ") ---");
                     System.out.print(colaPendientes.mostrar());
                     break;
+                case 4:
+                    opcionProcesar();
+                    break;
+                case 5:
+                    System.out.println("--- Historial de entregas, de la mas reciente a la mas antigua ("
+                            + historialEntregados.tamanio() + ") ---");
+                    System.out.print(historialEntregados.mostrar());
+                    break;
                 case 10:
                     return false;
                 default:
@@ -153,6 +178,13 @@ public class SistemaBiblioteca {
         System.out.println("Prestamo registrado y enviado a la cola de pendientes:");
         System.out.println("  " + prestamo);
         System.out.println("  Posicion en la cola: " + colaPendientes.tamanio());
+    }
+
+    private void opcionProcesar() {
+        LibroPrestamo entregado = procesarSiguiente();
+        System.out.println("Libro entregado al lector:");
+        System.out.println("  " + entregado);
+        System.out.println("  Pendientes restantes: " + colaPendientes.tamanio());
     }
 
     // ---------------------------------------------------------------------
