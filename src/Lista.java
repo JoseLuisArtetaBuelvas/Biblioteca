@@ -97,8 +97,127 @@ public class Lista {
         tamanio++;
     }
 
+    /**
+     * Elimina el primer elemento y lo devuelve.
+     *
+     * @throws IllegalStateException si la lista esta vacia
+     */
+    public Object eliminarPrimero() {
+        if (esVacia()) {
+            throw new IllegalStateException("La lista esta vacia, no hay elementos para eliminar");
+        }
+        Object dato = inicio.getDato();
+        if (inicio == fin) {
+            // Habia un solo nodo: la lista queda vacia.
+            inicio = null;
+            fin = null;
+        } else {
+            inicio = inicio.getDerecha();
+            inicio.setIzquierda(null); // se suelta el nodo eliminado
+        }
+        tamanio--;
+        return dato;
+    }
+
+    /**
+     * Elimina el ultimo elemento y lo devuelve. Costo O(1) porque el nodo
+     * "fin" conoce a su anterior mediante la referencia izquierda.
+     *
+     * @throws IllegalStateException si la lista esta vacia
+     */
+    public Object eliminarUltimo() {
+        if (esVacia()) {
+            throw new IllegalStateException("La lista esta vacia, no hay elementos para eliminar");
+        }
+        Object dato = fin.getDato();
+        if (inicio == fin) {
+            inicio = null;
+            fin = null;
+        } else {
+            fin = fin.getIzquierda();
+            fin.setDerecha(null);
+        }
+        tamanio--;
+        return dato;
+    }
+
+    /**
+     * Elimina el elemento de la posicion indicada y lo devuelve.
+     *
+     * @throws IndexOutOfBoundsException si el indice no existe
+     */
+    public Object eliminarEnPosicion(int indice) {
+        validarIndiceExistente(indice);
+        if (indice == 0) {
+            return eliminarPrimero();
+        }
+        if (indice == tamanio - 1) {
+            return eliminarUltimo();
+        }
+        // Nodo intermedio: su anterior y su siguiente se enlazan entre si,
+        // "saltandose" el nodo que se elimina.
+        Nodo actual = obtenerNodo(indice);
+        Nodo anterior = actual.getIzquierda();
+        Nodo siguiente = actual.getDerecha();
+        anterior.setDerecha(siguiente);
+        siguiente.setIzquierda(anterior);
+        actual.setIzquierda(null);
+        actual.setDerecha(null);
+        tamanio--;
+        return actual.getDato();
+    }
+
+    /**
+     * Devuelve el dato de una posicion sin eliminarlo.
+     *
+     * @throws IndexOutOfBoundsException si el indice no existe
+     */
+    public Object buscarDato(int indice) {
+        validarIndiceExistente(indice);
+        return obtenerNodo(indice).getDato();
+    }
+
+    /**
+     * Busca un dato recorriendo la lista desde el inicio y comparando con equals().
+     * Por eso es importante que la clase del dato sobrescriba equals():
+     * en este proyecto LibroPrestamo compara por codigo de prestamo.
+     *
+     * @return el dato que esta guardado en la lista, o null si no existe
+     */
+    public Object buscarDato(Object dato) {
+        Nodo actual = inicio;
+        while (actual != null) {
+            if (actual.getDato().equals(dato)) {
+                return actual.getDato();
+            }
+            actual = actual.getDerecha();
+        }
+        return null;
+    }
+
+    public boolean contiene(Object dato) {
+        return buscarDato(dato) != null;
+    }
+
     public int cuentaElementos() {
         return tamanio;
+    }
+
+    /**
+     * Vacia la lista. Al perder la referencia a inicio y fin, el recolector
+     * de basura de Java libera los nodos.
+     */
+    public void limpiar() {
+        inicio = null;
+        fin = null;
+        tamanio = 0;
+    }
+
+    private void validarIndiceExistente(int indice) {
+        if (indice < 0 || indice >= tamanio) {
+            throw new IndexOutOfBoundsException(
+                    "Posicion " + indice + " invalida. La lista tiene " + tamanio + " elementos");
+        }
     }
 
     /**
