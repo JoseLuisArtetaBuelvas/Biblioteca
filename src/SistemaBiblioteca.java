@@ -140,6 +140,23 @@ public class SistemaBiblioteca {
         return ultimo;
     }
 
+    /**
+     * Cada prestamo registrado esta en uno solo de tres estados, asi que:
+     *   registrados = pendientes (cola) + entregados (pila) + cancelados.
+     * Los cancelados se obtienen por diferencia, sin recorrer la lista.
+     */
+    public int contarCancelados() {
+        return listaGeneral.cuentaElementos() - colaPendientes.tamanio() - historialEntregados.tamanio();
+    }
+
+    public String reporteCantidades() {
+        return "--- Cantidad de prestamos ---\n"
+                + "Registrados (lista general): " + listaGeneral.cuentaElementos() + "\n"
+                + "Pendientes  (cola):          " + colaPendientes.tamanio() + "\n"
+                + "Entregados  (pila):          " + historialEntregados.tamanio() + "\n"
+                + "Cancelados:                  " + contarCancelados();
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
@@ -230,6 +247,9 @@ public class SistemaBiblioteca {
                     break;
                 case 8:
                     opcionDeshacer();
+                    break;
+                case 9:
+                    System.out.println(reporteCantidades());
                     break;
                 case 10:
                     return false;
