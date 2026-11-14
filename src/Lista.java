@@ -213,6 +213,44 @@ public class Lista {
         tamanio = 0;
     }
 
+    /**
+     * Recorre la lista de inicio a fin usando la referencia derecha.
+     * Devuelve un elemento por linea, numerado desde 1.
+     */
+    public String mostrarAdelante() {
+        if (esVacia()) {
+            return "(lista vacia)";
+        }
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = inicio;
+        int posicion = 1;
+        while (actual != null) {
+            sb.append(posicion).append(". ").append(actual.getDato()).append('\n');
+            actual = actual.getDerecha();
+            posicion++;
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Recorre la lista de fin a inicio usando la referencia izquierda.
+     * Solo es posible de forma eficiente porque la lista es doblemente enlazada.
+     */
+    public String mostrarAtras() {
+        if (esVacia()) {
+            return "(lista vacia)";
+        }
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = fin;
+        int posicion = tamanio;
+        while (actual != null) {
+            sb.append(posicion).append(". ").append(actual.getDato()).append('\n');
+            actual = actual.getIzquierda();
+            posicion--;
+        }
+        return sb.toString();
+    }
+
     private void validarIndiceExistente(int indice) {
         if (indice < 0 || indice >= tamanio) {
             throw new IndexOutOfBoundsException(
