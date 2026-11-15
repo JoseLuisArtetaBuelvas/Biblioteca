@@ -94,10 +94,18 @@ public class LibroPrestamo {
 
     public void setDocumentoLector(String documentoLector) {
         String documento = textoObligatorio(documentoLector, "documento del lector");
-        if (!documento.matches("\\d{6,12}")) {
+        if (!esDocumentoValido(documento)) {
             throw new IllegalArgumentException("El documento del lector debe tener entre 6 y 12 digitos");
         }
         this.documentoLector = documento;
+    }
+
+    /**
+     * Regla del documento: solo digitos, entre 6 y 12. Es publica y estatica para
+     * que el menu pueda validar el dato al leerlo, antes de crear el objeto.
+     */
+    public static boolean esDocumentoValido(String documento) {
+        return documento != null && documento.trim().matches("\\d{6,12}");
     }
 
     public LocalDate getFechaSolicitud() {

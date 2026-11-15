@@ -272,7 +272,7 @@ public class SistemaBiblioteca {
         String titulo = leerTexto(entrada, "Titulo del libro: ");
         String autor = leerTexto(entrada, "Autor: ");
         String lector = leerTexto(entrada, "Nombre del lector: ");
-        String documento = leerTexto(entrada, "Documento del lector: ");
+        String documento = leerDocumento(entrada);
 
         LibroPrestamo prestamo = new LibroPrestamo(codigo, titulo, autor, lector, documento);
         registrar(prestamo);
@@ -345,6 +345,20 @@ public class SistemaBiblioteca {
                 return texto;
             }
             System.out.println("  El campo no puede estar vacio.");
+        }
+    }
+
+    /**
+     * Lee el documento del lector y lo vuelve a pedir mientras no sea valido.
+     * Asi un documento mal escrito no descarta los datos ya digitados del prestamo.
+     */
+    private String leerDocumento(Scanner entrada) {
+        while (true) {
+            String documento = leerTexto(entrada, "Documento del lector: ");
+            if (LibroPrestamo.esDocumentoValido(documento)) {
+                return documento;
+            }
+            System.out.println("  El documento debe tener entre 6 y 12 digitos, sin puntos ni letras.");
         }
     }
 
